@@ -1,0 +1,56 @@
+diff --git a/node_modules/react-native-gifted-chat/lib/GiftedChat.d.ts b/node_modules/react-native-gifted-chat/lib/GiftedChat.d.ts
+index 0444a70..8b72ef8 100644
+--- a/node_modules/react-native-gifted-chat/lib/GiftedChat.d.ts
++++ b/node_modules/react-native-gifted-chat/lib/GiftedChat.d.ts
+@@ -181,6 +181,7 @@ declare namespace GiftedChat {
+         minComposerHeight: PropTypes.Requireable<number>;
+         maxComposerHeight: PropTypes.Requireable<number>;
+         alignTop: PropTypes.Requireable<boolean>;
++        bottomPadding?: number;
+     };
+     var append: <TMessage extends IMessage>(currentMessages: TMessage[] | undefined, messages: TMessage[], inverted?: boolean) => TMessage[];
+     var prepend: <TMessage extends IMessage>(currentMessages: TMessage[] | undefined, messages: TMessage[], inverted?: boolean) => TMessage[];
+diff --git a/node_modules/react-native-gifted-chat/lib/GiftedChat.js b/node_modules/react-native-gifted-chat/lib/GiftedChat.js
+index 9951cd8..a714d27 100644
+--- a/node_modules/react-native-gifted-chat/lib/GiftedChat.js
++++ b/node_modules/react-native-gifted-chat/lib/GiftedChat.js
+@@ -2,7 +2,7 @@ import { ActionSheetProvider, } from '@expo/react-native-action-sheet';
+ import dayjs from 'dayjs';
+ import localizedFormat from 'dayjs/plugin/localizedFormat';
+ import PropTypes from 'prop-types';
+-import React, { createRef, useEffect, useMemo, useRef, useState } from 'react';
++import React, { createRef, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+ import { KeyboardAvoidingView, Platform, StyleSheet, View, } from 'react-native';
+ import uuid from 'uuid';
+ import { Actions } from './Actions';
+@@ -29,7 +29,12 @@ function GiftedChat(props) {
+         ios: 'never',
+         android: 'always',
+         default: 'never',
+-    }), onInputTextChanged = null, maxInputLength = null, forceGetKeyboardHeight = false, inverted = true, minComposerHeight = MIN_COMPOSER_HEIGHT, maxComposerHeight = MAX_COMPOSER_HEIGHT, messageContainerRef = createRef(), textInputRef = createRef(), } = props;
++    }), onInputTextChanged = null, 
++    maxInputLength = null, forceGetKeyboardHeight = false, 
++    inverted = true, minComposerHeight = MIN_COMPOSER_HEIGHT, 
++    maxComposerHeight = MAX_COMPOSER_HEIGHT, messageContainerRef = createRef(), 
++    bottomPadding = 20,
++    textInputRef = createRef(), } = props;
+     const isMountedRef = useRef(false);
+     const keyboardHeightRef = useRef(0);
+     const bottomOffsetRef = useRef(0);
+@@ -45,6 +50,7 @@ function GiftedChat(props) {
+         text: undefined,
+         messages: undefined,
+     });
++    
+     useEffect(() => {
+         isMountedRef.current = true;
+         setState({
+@@ -93,7 +99,7 @@ function GiftedChat(props) {
+     const getMessagesContainerHeightWithKeyboard = (composerHeight = state.composerHeight) => {
+         return (getBasicMessagesContainerHeight(composerHeight) -
+             getKeyboardHeight() +
+-            bottomOffsetRef.current);
++            bottomOffsetRef.current + bottomPadding);
+     };
+     /**
+      * Store text input focus status when keyboard hide to retrieve
